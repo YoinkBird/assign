@@ -5,10 +5,13 @@
 
 # See the test cases for more details.
 
+import pdb
 from pprint import pprint
+from datetime import datetime
 
 debug   = 0
 verbose = 0
+logging = 0
 # flag var to add '\n' after certain '\r' operations
 globalVar = {'terminateCarriageReturn' : 0,}
 
@@ -60,8 +63,6 @@ def collate_data(site_list, user_list, time_list):
         webLogDict[tmpSite][tmpUser] = []
       # add timestamp array if not present
       webLogDict[tmpSite][tmpUser].append([tmpTime])
-      #else:
-        #webLogDict[tmpSite]
   #</assimilate data>
 
   for siteName in webLogDict:
@@ -76,11 +77,10 @@ def collate_data(site_list, user_list, time_list):
 
 #<def calculate_affinity>
 #TODO: this is a terribly inappropriate function call
-def calculate_affinity(siteDataDict, siteP, siteQ):
+def calculate_affinity(siteP, siteQ):
   affinity = 0
-  if(siteP in siteDataDict and siteQ in siteDataDict):
-    commonThings = siteDataDict[siteP]['userSet'].intersection(siteDataDict[siteQ]['userSet'])
-    affinity = len(commonThings)
+  commonThings = siteP['userSet'].intersection(siteQ['userSet'])
+  affinity = len(commonThings)
   return affinity
 #</def calculate_affinity>
 
@@ -102,63 +102,52 @@ def highest_affinity(site_list, user_list, time_list):
   # add data to a dict
   siteDataDict = collate_data(site_list, user_list, time_list)
 
-  # < find most users>
-  # find site with most users
-  # bug - does not account for multiple users in one list
-  numUsers = -1
-  for siteName in siteDataDict:
-    numUsersTmp = len(siteDataDict[siteName])
-    if(numUsersTmp > numUsers):
-      numUsers = numUsersTmp
-  # </find most users>
-
   # < calculate affinities>
   # strategy: compare site_n to remaining sites site_n+[1,end] , then site_(n+1) to site_(n+1)+[1,end]
-  # track compared sites to avoid situation e.g. 'a intersect b' followed by 'b intersect a'
+  # delete already compared sites to avoid situation e.g. 'a intersect b' followed by 'b intersect a'
   visitedSites = []
   affinityList = []
   affinityPairsDict = {}
   affinityDict = {}
   #for currentSite in range(1,len(siteDataDict)):
   sitesRemaining = len(siteDataDict)
-  for currentSite in siteDataDict:
+  siteNameList = siteDataDict.keys()
+  for siteNumber in range(0,len(siteNameList)):
+    currentSite = siteDataDict[siteNameList[siteNumber]]
+    currentSite = siteNameList[siteNumber]
+    timeStart = datetime.now()
     sitesRemaining -= 1
     if(sitesRemaining == 1 or sitesRemaining == -1):
       printInfo(str(sitesRemaining) + " site  remining")
     else:
       printInfo(str(sitesRemaining) + " sites remining")
     printInfo("checking affinity for " + currentSite)
-    # skip this site for future comparisson
-    visitedSites.append(currentSite)
     # get intersection of userSet for current site and all remaining sites
     siteCounter = 0
+    # remove current site from dict to avoid comparing to self
+    currentSiteDict = siteDataDict[currentSite]
+    del(siteDataDict[currentSite])
     for nextSite in siteDataDict:
-      # do not compare to visited sites (including self)
-      if nextSite in visitedSites:
-        if(debug >= 2):
-          #print("skipping " + nextSite + " while comparing to " + currentSite)
-          print("skipping " + nextSite)# + " while comparing to " + currentSite)
-        continue
       # track number of sites that have been compared
       siteCounter += 1
       #printInfo("  comparing to " + currentSite)
       import sys
-      if(verbose >= 1):
+      if(verbose >= 1 and (logging != 1)):
         #TODO: create local var for this and shove everything into a subroutine
         globalVar['terminateCarriageReturn'] = 1
         sys.stdout.write("\r" + str(siteCounter) + "  comparing to " + nextSite + ' ' * 20)
       #ver1 this would be pair = affinity
       affinityPairsDict[(currentSite,nextSite)] = \
-      calculate_affinity(siteDataDict,currentSite,nextSite)
+      calculate_affinity(currentSiteDict,siteDataDict[nextSite])
       #ver2 this would be affinity = pair
       #TODO: dict key affinity, value array of tuples to track multiple equal affinities
-      affinityDict[ calculate_affinity(siteDataDict,currentSite,nextSite)] = \
+      affinityDict[ calculate_affinity(currentSiteDict,siteDataDict[nextSite])] = \
           (currentSite,nextSite)
     # </'for nextSite in siteDataDict:'>
     if(globalVar['terminateCarriageReturn'] == 1): # tied to the sys.stdout.write("\r") a few lines above
       print("")
-    #siteDataDict[currentSite]['userSet']
-    #for remainingSite in range(currentSite+1,len(siteDataDict)):
+    timeEnd = datetime.now()
+    printInfo(str(timeEnd - timeStart) + " duration")
   # </calculate affinities>
 
   # < find highest affinity>
@@ -169,12 +158,6 @@ def highest_affinity(site_list, user_list, time_list):
         affinityDict[(max(affinityDict))]
         )
       )
-
-
-
-
-
-
 
   return maxAffinityTuple
   return ('abc', 'def')
