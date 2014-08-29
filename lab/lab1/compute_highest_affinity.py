@@ -95,6 +95,7 @@ def printInfo(printme):
 
 
 def highest_affinity(site_list, user_list, time_list):
+  totalTimeStart = datetime.now()
   # Returned string pair should be ordered by dictionary order
   # I.e., if the highest affinity pair is "foo" and "bar"
   # return ("bar", "foo"). 
@@ -111,16 +112,19 @@ def highest_affinity(site_list, user_list, time_list):
   affinityDict = {}
   #for currentSite in range(1,len(siteDataDict)):
   sitesRemaining = len(siteDataDict)
+  totalSites     = len(siteDataDict)
   siteNameList = siteDataDict.keys()
   for siteNumber in range(0,len(siteNameList)):
     currentSite = siteDataDict[siteNameList[siteNumber]]
     currentSite = siteNameList[siteNumber]
     timeStart = datetime.now()
     sitesRemaining -= 1
+    infoStr = str(sitesRemaining)
     if(sitesRemaining == 1 or sitesRemaining == -1):
-      printInfo(str(sitesRemaining) + " site  remining")
+      infoStr += " site  remaining"
     else:
-      printInfo(str(sitesRemaining) + " sites remining")
+      infoStr += " sites remaining"
+    printInfo(infoStr)
     printInfo("checking affinity for " + currentSite)
     # get intersection of userSet for current site and all remaining sites
     siteCounter = 0
@@ -132,7 +136,7 @@ def highest_affinity(site_list, user_list, time_list):
       siteCounter += 1
       #printInfo("  comparing to " + currentSite)
       import sys
-      if(verbose >= 1 and (logging != 1)):
+      if(verbose >= 2 and (logging != 1)):
         #TODO: create local var for this and shove everything into a subroutine
         globalVar['terminateCarriageReturn'] = 1
         sys.stdout.write("\r" + str(siteCounter) + "  comparing to " + nextSite + ' ' * 20)
@@ -159,6 +163,8 @@ def highest_affinity(site_list, user_list, time_list):
         )
       )
 
+  totalTimeEnd = datetime.now()
+  printInfo("checked " + str(totalSites) + " number of sites in " + str(totalTimeEnd - totalTimeStart)) 
   return maxAffinityTuple
   return ('abc', 'def')
 #</def highest_affinity> 
