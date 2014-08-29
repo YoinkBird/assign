@@ -120,25 +120,33 @@ def highest_affinity(site_list, user_list, time_list):
   affinityPairsDict = {}
   affinityDict = {}
   #for currentSite in range(1,len(siteDataDict)):
+  sitesRemaining = len(siteDataDict)
   for currentSite in siteDataDict:
+    sitesRemaining -= 1
+    if(sitesRemaining == 1 or sitesRemaining == -1):
+      printInfo(str(sitesRemaining) + " site  remining")
+    else:
+      printInfo(str(sitesRemaining) + " sites remining")
     printInfo("checking affinity for " + currentSite)
     # skip this site for future comparisson
     visitedSites.append(currentSite)
     # get intersection of userSet for current site and all remaining sites
     siteCounter = 0
     for nextSite in siteDataDict:
-      siteCounter += 1
       # do not compare to visited sites (including self)
       if nextSite in visitedSites:
         if(debug >= 2):
           #print("skipping " + nextSite + " while comparing to " + currentSite)
           print("skipping " + nextSite)# + " while comparing to " + currentSite)
         continue
+      # track number of sites that have been compared
+      siteCounter += 1
       #printInfo("  comparing to " + currentSite)
       import sys
       if(verbose >= 1):
+        #TODO: create local var for this and shove everything into a subroutine
         globalVar['terminateCarriageReturn'] = 1
-        sys.stdout.write("\r" + str(siteCounter) + "  comparing to " + nextSite)
+        sys.stdout.write("\r" + str(siteCounter) + "  comparing to " + nextSite + ' ' * 20)
       #ver1 this would be pair = affinity
       affinityPairsDict[(currentSite,nextSite)] = \
       calculate_affinity(siteDataDict,currentSite,nextSite)
