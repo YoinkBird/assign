@@ -8,6 +8,19 @@
 from pprint import pprint
 verbose = 0
 
+'''
+For any pair of pages (P,Q) define the affinity to be the number of persons who viewed both.
+
+Your goal in this lab is to take as input log file data and return the pair of pages that has the highest affinity. In case of ties return any maximum common count pair. See the provided template code for details.
+'''
+'''
+Steps
+
+Read through the test cases, make sure you understand the expected results. You can run the test cases as python programs, i.e., python test1.py. (All files must be in the same directory.) 
+If your solution is incorrect, you will see an assertion failure. 
+If it passes, the test does not print anything.
+Submit your finished compute_highest_affinity.py source code file via blackboard.
+'''
 ################################################################
 
 def collate_data(site_list, user_list, time_list):
