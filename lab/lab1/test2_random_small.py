@@ -7,7 +7,9 @@ user_list = ['user_6', 'user_1', 'user_2', 'user_7', 'user_3', 'user_2', 'user_0
 time_list = xrange(0,100)
 
 computed_result = compute_highest_affinity.highest_affinity(site_list, user_list, time_list)
+print("computed result:" + str(computed_result))
 expected_result = ("facebook", "google")
+print("expected result:" + str(expected_result))
 
 assert computed_result == expected_result
 print "Successfully passed test2!"

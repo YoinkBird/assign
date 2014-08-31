@@ -12,3 +12,4 @@ computed_result = compute_highest_affinity.highest_affinity(site_list, user_list
 expected_result = ("facebook", "google")
 
 assert computed_result == expected_result
+print "Successfully passed test2!"
