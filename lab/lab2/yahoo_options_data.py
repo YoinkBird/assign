@@ -258,7 +258,7 @@ def convert_2d_list_to_list_of_dicts(twoDList):
   # hold dicts
   dataDictList = []
   # zeroth row is header and defines keys
-  for rowIndex in range(1,len(twoDList)-1):
+  for rowIndex in range(1,len(twoDList)):
     # loop through values
     tempDict = {}
     #for colIndex in range(0,len(twoDList[rowIndex])-1):
