@@ -193,8 +193,17 @@ def getOptionQuotes(filename):
         # pass to the 'parseFile' subroutine
         optionQuoteListTmp = parseFile(subTable)
         optionQuoteListTmp = addHeaderName(optionQuoteListTmp,{'Type':optionType})
-        #overwrites optionQuoteList = convert_2d_list_to_list_of_dicts(optionQuoteListTmp)
+        # < regex_replace>
+        # mini contract:
+        # http://www.cboe.com/Products/indexopts/mini_spec.aspx
+        # The option symbol for Mini Options shall be the underlying security symbol followed by the number "7"
+        # find symbol 'AAPL' or 'AAPL7' and hard-code replace for testing
+        symbolIndex = optionQuoteListTmp[0].index('Symbol')
+        replaceValues(optionQuoteListTmp,symbolIndex,'(\D+[7]{,1}).*',r'\1')
+        # </regex_replace>
+
         optionQuoteListTmp = convert_2d_list_to_list_of_dicts(optionQuoteListTmp)
+
         #print("-I-: adding " + str(len(optionQuoteListTmp)) + " elements")
         optionQuoteList.extend(optionQuoteListTmp)
         # populate optionQuoteList
@@ -277,6 +286,32 @@ def addHeaderName(table,headerDict):
     
 #</def addHeaderName>
 
+#< def replaceValues>
+# replace values in column for a given header
+def replaceValues(table,valueIndex,matchExpr,replExpr):
+  for index in range(1,len(table)):
+    #newValue = re.sub('(AAPL[7]{,1}).*',r'\1',table[index][valueIndex])
+    newValue = re.sub(matchExpr,replExpr,table[index][valueIndex])
+    #print('-I-: changing ' + table[index][valueIndex] + ' to ' + newValue)
+    table[index][valueIndex] = newValue
+
+  #<verify table integrity>
+  # ensure that all rows have same number of cells
+  # 0th row is header row; using this to define correct number of cells
+  rowSize = len(table[0])
+  for row in table:
+    rowLen = len(row)
+    msgStr = ""
+    msgStr += ("     length - expected: " + str(rowSize) + " found: " + str(rowLen))
+    if(rowLen != rowSize):
+      msgStr = ("-E-: row length mismatch") + msgStr
+      print(msgStr)
+    elif(0):
+      msgStr = ("-I-: row length match") + msgStr
+      print(msgStr)
+  #</verify table integrity>
+  return table
+#</def replaceValues>
 
 def contractAsJson(filename):
   #refactored to work with getOptionQuotes: parseFile(filename)
