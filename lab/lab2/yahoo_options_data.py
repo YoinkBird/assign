@@ -104,7 +104,7 @@ def getCurrPrice(filename):
   soup = BeautifulSoup(open(filename))
   currPriceList = []
   for spanrtq in soup.find_all("span",attrs={'class' : 'time_rtq_ticker'}):
-    currPriceList.append(spanrtq.get_text())
+    currPriceList.append(float(spanrtq.get_text()))
     
   return currPriceList[0]
 
@@ -113,6 +113,9 @@ def getCurrPrice(filename):
 #<def getDateUrls>
 # dateUrls
 # <td> View By Expiration:
+#TODO:
+# get this one as well, which is at the very bottom and is good for nothing :-(
+# <a href="/q/os?s=AAPL&amp;m=2014-09-05" data-rapid_p="218"><strong>Expand to Straddle View...</strong></a>
 def getDateUrls(filename):
   soup = BeautifulSoup(open(filename))
   # find yfncsumtab and then td with 'View By Expiration'
@@ -133,6 +136,13 @@ def getDateUrls(filename):
       len(dateUrlContainer.findChildren('a',href=True,recursive=False))
       for link in (dateUrlContainer.findChildren('a',href=True,recursive=False)):
         dateUrlList.append(link.get('href'))
+      #for element in (dateUrlContainer.children):
+      # show immediate children; then we look for links recursively in any non-table elements
+      for element in (dateUrlContainer.findChildren(recursive=False)):
+        if(element.name == 'table'):
+          continue
+        for link in (element.findChildren('a',href=True)):
+          dateUrlList.append(link.get('href'))
 
   # </find correct table>
   #TODO: this is hack because locally rendered file does not have proper url
@@ -158,6 +168,7 @@ def getDateUrls(filename):
 # data
 # <table class="yfnc_datamodoutline1" width="100%" cellpadding="5" cellspacing="0" border="2">...<table>
 
+#TODO: sort in order of open interest 
 def getOptionQuotes(filename):
   soup = BeautifulSoup(open(filename))
   # desired format is array of hashes
@@ -193,14 +204,26 @@ def getOptionQuotes(filename):
         # pass to the 'parseFile' subroutine
         optionQuoteListTmp = parseFile(subTable)
         optionQuoteListTmp = addHeaderName(optionQuoteListTmp,{'Type':optionType})
+        # < process_symbol >
+        # position of symbol
+        symbolIndex = optionQuoteListTmp[0].index('Symbol')
+        # < extract_date>
+        for index in range(1,len(optionQuoteListTmp)):
+          symbolPartsList = re.findall('(\D+[7]{,1})(\d{6}).*',optionQuoteListTmp[index][symbolIndex])
+          # second element is the date
+          optionQuoteListTmp[index].append(symbolPartsList[0][1])
+        optionQuoteListTmp[0].append("Date")
+        verifyTable(optionQuoteListTmp)
+        # </extract_date>
+
         # < regex_replace>
         # mini contract:
         # http://www.cboe.com/Products/indexopts/mini_spec.aspx
         # The option symbol for Mini Options shall be the underlying security symbol followed by the number "7"
         # find symbol 'AAPL' or 'AAPL7' and hard-code replace for testing
-        symbolIndex = optionQuoteListTmp[0].index('Symbol')
-        replaceValues(optionQuoteListTmp,symbolIndex,'(\D+[7]{,1}).*',r'\1')
+        replaceValues(optionQuoteListTmp,symbolIndex,'(\D+[7]{,1})(\d{6}).*',r'\1')
         # </regex_replace>
+        # </process_symbol >
 
         optionQuoteListTmp = convert_2d_list_to_list_of_dicts(optionQuoteListTmp)
 
@@ -312,6 +335,24 @@ def replaceValues(table,valueIndex,matchExpr,replExpr):
   #</verify table integrity>
   return table
 #</def replaceValues>
+
+#<verify table integrity>
+# ensure that all rows have same number of cells
+# 0th row is header row; using this to define correct number of cells
+def verifyTable(table):
+  rowSize = len(table[0])
+  for row in table:
+    rowLen = len(row)
+    msgStr = ""
+    msgStr += ("     length - expected: " + str(rowSize) + " found: " + str(rowLen))
+    if(rowLen != rowSize):
+      msgStr = ("-E-: row length mismatch") + msgStr
+      print(msgStr)
+    elif(0):
+      msgStr = ("-I-: row length match") + msgStr
+      print(msgStr)
+  return
+#</verify table integrity>
 
 def contractAsJson(filename):
   quoteDataDict = {}
