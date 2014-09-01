@@ -26,11 +26,11 @@ def parseFile(filename):
     table = tableOuter.findNext("table")
 
     #<table header>
-    optionQuotesList = []
+    headerList = []
     # | Strike | Symbol | Last | Chg | Bid | Ask | Vol | Open Int |
     for header in (table.findAll('th',attrs={'class':'yfnc_tablehead1','scope':'col'})):
     #for header in (table.findAll("th",class_="yfnc_tablehead1",scope_="col")):
-      optionQuotesList.append(header.get_text())
+      headerList.append(header.get_text())
     #</table header>
 
     #<table row>
@@ -50,13 +50,34 @@ def parseFile(filename):
       if 0 or cellList:
         rowList.append(cellList)
     #</read rows>
-    print("read in these rows:")
-    print(' | '.join(optionQuotesList))
-    for row in rowList:
-      print row
-
     #</table row>
-  return
+
+    # add header row to table
+    rowList.insert(0, headerList)
+    if(0):
+      print("read in these rows:")
+      #print(' | '.join(headerList))
+      for row in rowList:
+        print row
+
+    #<verify table correctness>
+    # ensure that all rows have same number of cells
+    # 0th row is header row; using this to define correct number of cells
+    rowSize = len(rowList[0])
+    for row in rowList:
+      rowLen = len(row)
+      msgStr = ""
+      msgStr += ("     length - expected: " + str(rowSize) + " found: " + str(rowLen))
+      if(rowLen != rowSize):
+        msgStr = ("-E-: row length mismatch") + msgStr
+        print(msgStr)
+      elif(0):
+        msgStr = ("-I-: row length match") + msgStr
+        print(msgStr)
+    #</verify table correctness>
+
+  return rowList
+#</def parseFile>
 
 
 def contractAsJson(filename):
