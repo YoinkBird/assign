@@ -417,6 +417,11 @@ def contractAsJson(filename):
   quoteDataDict['currPrice'] = getCurrPrice(filename)
   quoteDataDict['dateUrls']  = getDateUrls(filename)
   jsonQuoteData = "[]"
+  # json conversion
   jsonQuoteData = json.dumps(quoteDataDict, sort_keys=True,indent=4, separators=(',', ': '))
+  if(0): # dump to file for diff
+    with open('data.json', 'w') as outfile:
+      json.dump(quoteDataDict, outfile, sort_keys=True,indent=4)
+
 
   return jsonQuoteData
