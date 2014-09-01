@@ -40,7 +40,8 @@ def parseFile(filename):
       #TODO: hack: json file shows 'change' whereas webpage shows 'chg'
       if(1):
         headerText = re.sub('Chg','Change',headerText)
-      headerList.append(header.get_text())
+        headerText = re.sub('Open Int','Open',headerText)
+      headerList.append(headerText)
 
     #TODO: update the 'Symbol' names
     #  possibly easy with json; could also find all in beautifulsoup and swap out in the html
@@ -140,6 +141,7 @@ def getDateUrls(filename):
     dateUrlListTmp = []
     for link in dateUrlList:
       #link = parentUrl + '/' + link # href already has leading slash
+      # https://www.google.com/search?q=python+htmlentities
       link = re.sub('&','&amp;',link)
       dateUrlListTmp.append(parentUrl + link)
   dateUrlList = dateUrlListTmp
