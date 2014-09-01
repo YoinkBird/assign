@@ -79,8 +79,25 @@ def parseFile(filename):
   return rowList
 #</def parseFile>
 
+#<def getCurrPrice>
+#price is in time_rtq_ticker
+# html code:
+# <span class="time_rtq_ticker"><span id="yfs_l84_aapl">95.82</span></span>
+def getCurrPrice(filename):
+  soup = BeautifulSoup(open(filename))
+  currPriceList = []
+  for spanrtq in soup.find_all("span",attrs={'class' : 'time_rtq_ticker'}):
+    currPriceList.append(spanrtq.get_text())
+    
+  print
+  return currPriceList[0]
+
+#</def getCurrPrice>
+
 
 def contractAsJson(filename):
   parseFile(filename)
+  quoteDataDict = {}
+  quoteDataDict['currPrice'] = getCurrPrice(filename)
   jsonQuoteData = "[]"
   return jsonQuoteData
