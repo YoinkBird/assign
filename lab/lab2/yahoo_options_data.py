@@ -94,10 +94,45 @@ def getCurrPrice(filename):
 
 #</def getCurrPrice>
 
+#<def getDateUrls>
+# dateUrls
+# <td> View By Expiration:
+def getDateUrls(filename):
+  soup = BeautifulSoup(open(filename))
+  # find yfncsumtab and then td with 'View By Expiration'
+  dateUrlMarkerText = "View By Expiration: "
+  # hold the date URLs
+  dateUrlList = []
+  # <find correct table>
+  for table in soup.find_all("table",id="yfncsumtab"):
+    # find 'View By Expiration'
+    for dateUrlMarkerMatch in soup.find_all(text=re.compile(dateUrlMarkerText)):
+      # find parent of the dateUrlMarkerMatch element
+      # this will contain all of the required 'a href'
+      dateUrlContainer = dateUrlMarkerMatch.findParent()
+      # list all direct 'a' underneath the parent element of the 'View by Expiration" text
+      # debug: check length
+      len(dateUrlContainer.findChildren('a',href=True,recursive=False))
+      for link in (dateUrlContainer.findChildren('a',href=True,recursive=False)):
+        dateUrlList.append(link.get('href'))
+
+  # </find correct table>
+  #TODO: this is hack because locally rendered file does not have proper url
+  if(1):
+    parentUrl = 'http://finance.yahoo.com'
+    dateUrlListTmp = []
+    for link in dateUrlList:
+      #link = parentUrl + '/' + link # href already has leading slash
+      link = re.sub('&','&amp;',link)
+      dateUrlListTmp.append(parentUrl + link)
+  dateUrlList = dateUrlListTmp
+  return dateUrlList
+#</def getDateUrls>
 
 def contractAsJson(filename):
   parseFile(filename)
   quoteDataDict = {}
   quoteDataDict['currPrice'] = getCurrPrice(filename)
+  quoteDataDict['dateUrls']  = getDateUrls(filename)
   jsonQuoteData = "[]"
   return jsonQuoteData
