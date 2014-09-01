@@ -314,10 +314,11 @@ def replaceValues(table,valueIndex,matchExpr,replExpr):
 #</def replaceValues>
 
 def contractAsJson(filename):
-  #refactored to work with getOptionQuotes: parseFile(filename)
   quoteDataDict = {}
   quoteDataDict['optionQuotes'] = getOptionQuotes(filename)
   quoteDataDict['currPrice'] = getCurrPrice(filename)
   quoteDataDict['dateUrls']  = getDateUrls(filename)
   jsonQuoteData = "[]"
+  jsonQuoteData = json.dumps(quoteDataDict, sort_keys=True,indent=4, separators=(',', ': '))
+
   return jsonQuoteData
