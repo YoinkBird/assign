@@ -225,13 +225,29 @@ def getOptionQuotes(filename):
         # </regex_replace>
         # </process_symbol >
 
-        optionQuoteListTmp = convert_2d_list_to_list_of_dicts(optionQuoteListTmp)
+        #TODO: sortrefactor - uncomment this 
+        #optionQuoteListTmp = convert_2d_list_to_list_of_dicts(optionQuoteListTmp)
 
         #print("-I-: adding " + str(len(optionQuoteListTmp)) + " elements")
-        optionQuoteList.extend(optionQuoteListTmp)
+
         # populate optionQuoteList
+        # TODO: sortrefactor - remove this when converting to sorting the list of dicts
+        # remove header if optionQuoteList already populated
+        if(optionQuoteList):
+          del(optionQuoteListTmp[0])
+        optionQuoteList.extend(optionQuoteListTmp)
+        
         # clear optionType to make sure it gets set properly
         optionType = ''
+      #</check_class==tabledata>
+    #</loop_subtables>
+  # sort 2d list by 'open interest' i.e. the 'Open' field
+  # TODO: sortrefactor - simply sort the final array of dicts
+  # e.g.:
+  # for dict in array: if(dict{'Open'} > dictPrev{'Open'}
+  optionQuoteList = sortTable(optionQuoteList,'Open')
+  # convert 2d list to required format
+  optionQuoteList = convert_2d_list_to_list_of_dicts(optionQuoteList)
   # </find_parent_table>
   return optionQuoteList
 #</def getOptionQuotes>
@@ -335,6 +351,47 @@ def replaceValues(table,valueIndex,matchExpr,replExpr):
   #</verify table integrity>
   return table
 #</def replaceValues>
+
+#< def sortTable>
+# default descending
+def sortTable(table,field):
+  fieldIndex = table[0].index(field)
+
+  # simple buble sort
+  # just create a new list
+  sortedTable = []
+  biggestVal = '-1'
+  biggestIndex = -1
+  while table:
+    for index in range(1,len(table)):
+      tableLen = len(table)
+      currentField = table[index][fieldIndex].replace(',','')
+      biggestValInt = biggestVal.replace(',','')
+      currentField = int(currentField)
+      biggestValInt = int(biggestValInt)
+      #print("checking " + table[index][fieldIndex] + '\t against ' + biggestVal)
+      #print("checking " + str(currentField) + '\t against ' + str(biggestValInt))
+      if(currentField > biggestValInt):
+        biggestVal = table[index][fieldIndex]
+        biggestIndex = index
+      #  print(str(currentField) + ' > ' + str(biggestValInt))
+      #print("index: " + str(index) + " table: " + str(tableLen))
+      # debug...
+      if(0 and tableLen <= 2 and index >= 1):
+        set_trace()
+        # for row in sortedTable: print row
+    #set_trace()
+    if(len(table)>1):
+      #print("adding to sortedTable:" , table[biggestIndex][fieldIndex])
+      sortedTable.append(table[biggestIndex])
+      del(table[biggestIndex])
+      biggestVal = '-1'
+    else:
+      sortedTable.insert(0,table[0])
+      del(table[0])
+      break
+  return sortedTable
+#</def sortTable>
 
 #<verify table integrity>
 # ensure that all rows have same number of cells
