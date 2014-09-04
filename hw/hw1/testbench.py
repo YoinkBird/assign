@@ -1,5 +1,5 @@
 from pprint import pprint
-import pdb
+from ipdb import *
 debug = 0
 verbose = 2
 #verbose = 0
@@ -42,7 +42,7 @@ def initDeck(deckSize):
     debugPrintStr += "deck initialised\n"
   if(verbose >= 1):
     debugPrintStr = debugPrintStr + "total elements: " + str(len(deck)) + '\n'
-  if(verbose == 2):
+  if(0 and verbose == 2):
     #<table>
 
     # rank is first cell, highest rank is 2 digits
@@ -81,6 +81,35 @@ def initDeck(deckSize):
   return deck
 ## </ def initDeck() > ######################
 
+# < def createPlayerList>
+def createHashList(amount):
+  hashList = []
+  for index in range(0,amount):
+    hashList.append({})
+  return hashList
+
+# </def createPlayerList>
+
+# < def getNumHand>
+def getNumHand(hand):
+  numCards = 0
+  for suit in hand:
+    numCards += len(hand[suit])
+  return numCards
+# </def getNumHand>
+
+# < def printHand>
+def printHand(hand):
+  #print("old fashioned")
+  #pprint(hand,indent=2)
+  #print("new fangled")
+  for suit in sorted(hand):
+    import sys
+    sys.stdout.write(suit + ':')
+    pprint(hand[suit])
+# </def printHand>
+
+
 # print dict sorted for easier viewing
 def printDictSorted(dict):
   tmpDict = dict;
@@ -91,6 +120,7 @@ def printDictSorted(dict):
 
 # main
 # create a deck of 52 cards
+deckLength = 52
 gofishDeck = initDeck(52)
 
 #import gofish1
@@ -100,16 +130,69 @@ from gofish1 import drawCard
 
 # invent some players - for now only one is needed
 playerList = ["johny","barker","sally","sushmita"]
-playerHand = {};
+if 0:
+  playerHand = {};
+  playerHand2 = {};
+  playerHand3 = {};
+  playerHand4 = {};
 #TODO : create a player class and instantiate 4 players
 
+# seemingly currently broken; do not increase! does not affect things anyway
+numPlayas = 4
+handList = createHashList(numPlayas)
+
+#test1 - does 'drawCard' work for 52 consecutive cards
 #for i in range(0,52): ## 52 is one longer, causes an error, and therefore rules out incomplete loop as the cause
 while gofishDeck:
-  drawCard(playerList[0], gofishDeck, playerHand)
+  index = 0
+  for playerHand in handList:
+  #for playerHand in createHashList(numPlayas):
+    #print("####################")
+    numCardsPrev = getNumHand(playerHand)
+    #print(numCardsPrev)
+    #printHand(playerHand)
+    #note: playerHand and playerHandPrev get updated this way, but for the deletion only playerHand is updated...
+    #playerHandPrev = playerHand.copy()
+    import copy
+    playerHandPrev = copy.deepcopy(playerHand)
+    drawCard(playerList[index],gofishDeck,playerHand)
+    # test size of hand 
+    numCardsPost = getNumHand(playerHand)
+    # either one card was added or four cards were removed
+    if((numCardsPost != numCardsPrev + 1) and (numCardsPost - numCardsPrev != 4)):
+      print("-E-: hand seems to have had either more than one card added or other than 4 cards removed.")
+      print("-I-: Manually compare the following to pinpoint the error")
+      print("-I-: previous values:")
+      # did not expose a bug with copy
+      #print("number of cards: " + str(numCardsPrev))
+      print("number of cards: " + str(getNumHand(playerHandPrev)))
+      print("hand:")
+      printHand(playerHandPrev)
+      print("-I-: current values:")
+      print("number of cards: " + str(numCardsPost))
+      print("hand:")
+      printHand(playerHand)
+    #index += 1
+#set_trace()
+# calculate total number of cards
+totCards = 0
+for player in handList:
+  #totCards += len(handList[player])
+  totCards += getNumHand(player)
+print("total cards: " + str(totCards))
+if(totCards != deckLength):
+  print("-I-: deck had cards subtracted!")
+# check if total number divisible by 4, the number of cards discarded for a successful match
+if((totCards % 4) != 0):
+  print("-E-: deck seems to have had more/less cards removed than 4, the number of cards legally removable in go-fish")
 
-from pprint import pprint
 
-pprint(playerHand,indent=2)
+index = 0
+for pHand in handList:
+  print(playerList[index])
+  printHand(pHand)
+  #pprint(pHand,indent=2)
+  index += 1
 
 # technique for printing dict as indented structure
 if(0):
