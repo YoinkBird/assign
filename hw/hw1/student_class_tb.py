@@ -112,6 +112,28 @@ for x in sorted(studentDict):
   print(x)
 if(pdebug == 1):
   set_trace()
+
+# lambda
+del studentList
+studentList = []; #= [genRandomStudent() for rand in xrange(5)]
+studentList.append(Student('Zacharias',4.0,20))
+studentList.append(Student('Zacharias',3.8,19))
+studentList.append(Student('Zane',     3.7,20))
+studentList.append(Student('Zambor',   3.6,20))
+studentList.append(Student('Adam',     3.8,19))
+set_trace()
+import pprint
+#pprint.pprint(sorted(sorted(studentList, key=lambda student: student.gpa), key=lambda student:student.age))
+pprint.pprint(\
+  sorted(\
+    sorted(\
+    sorted(\
+      studentList, \
+      key=lambda student: student.name), \
+      key=lambda student: student.age), \
+      key=lambda student:student.gpa))
+
+
 printSeparator()
 studentList = []
 for num in range(0,2):
