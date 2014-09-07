@@ -75,26 +75,39 @@ if(student4.__lt__(student2) and (student4 < student2)):
 else:
   print("-E-: FAIL")
 printSeparator()
-# check sorted
+### check sorted()
 print("-I-: test list sort:")
 if(pdebug == 1):
   set_trace()
-print
+
+# generate list of student-objects with random attributes
 studentList = [genRandomStudent() for rand in xrange(10)]
-print("  for x in sorted(studentList): print(x)")
+print("    random list :")
+print(">>> studentList = [genRandomStudent() for rand in xrange(10)] ")
+print("")
+for x in (studentList):
+  print(x)
+del x
+print("  sorted list :")
+print(">>> for x in sorted(studentList): print(x)")
 for x in sorted(studentList):
   print(x)
 
 printSeparator()
 if(pdebug == 1):
   set_trace()
-# check dict
+### check dict()
 print("-I-: test dict sort:")
+print("     random dict:")
+print(">>> studentDict = {genRandomStudent():1 for i in range(10)}")
+print("")
 
-studentDict = {}
-for tmpStudNum in xrange(10):
-  studentDict[genRandomStudent()] = 1
-
+# generate dict of student-objects with random attributes
+studentDict = {genRandomStudent():1 for i in range(10)}
+for x in (studentDict):
+  print(x)
+print("    sorted dict:")
+print(">>> for x in sorted(studentDict): print(x)")
 for x in sorted(studentDict):
   print(x)
 if(pdebug == 1):
