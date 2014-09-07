@@ -3,6 +3,10 @@ import random
 from ipdb import *
 import copy
 
+# turn on breakpoints
+pdebug = 0
+
+
 from student_class import Student
 
 def genRandomStudent(**kwargs):
@@ -70,9 +74,32 @@ if(student4.__lt__(student2) and (student4 < student2)):
   print("-I-: PASS")
 else:
   print("-E-: FAIL")
+printSeparator()
+# check sorted
+print("-I-: test list sort:")
+if(pdebug == 1):
+  set_trace()
+print
+studentList = [genRandomStudent() for rand in xrange(10)]
+print("  for x in sorted(studentList): print(x)")
+for x in sorted(studentList):
+  print(x)
 
-set_trace()
+printSeparator()
+if(pdebug == 1):
+  set_trace()
+# check dict
+print("-I-: test dict sort:")
 
+studentDict = {}
+for tmpStudNum in xrange(10):
+  studentDict[genRandomStudent()] = 1
+
+for x in sorted(studentDict):
+  print(x)
+if(pdebug == 1):
+  set_trace()
+printSeparator()
 studentList = []
 for num in range(0,2):
   print(num)

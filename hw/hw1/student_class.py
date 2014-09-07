@@ -10,7 +10,7 @@ from ipdb import *
 #@total_ordering
 class Student:
   def __init__(self,name,gpa,age):
-    set_trace()
+ #   set_trace()
     self.name = name
     self.gpa  = gpa
     self.age  = age
