@@ -1,0 +1,64 @@
+#!/bin/perl
+use strict;
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+#
+# To enable this hook, rename this file to "pre-commit".
+
+print("git hook: checking for lines longer than 80 chars\n");
+print(@ARGV);
+
+#TODO: check each file individually, e.g.
+my $stagedFiles = `git diff --cached --name-only`;
+my @stagedFilesArr = split("\n",$stagedFiles);
+
+my %stagedHash;
+foreach my $file (@stagedFilesArr){
+  my $cmd = "git diff --cached -- $file";
+  my $cmdOut = `$cmd`;
+  $stagedHash{$file} = $cmdOut;
+}
+
+
+my %longLineHash;
+my $lineNum = 0;
+foreach my $fileName (keys(%stagedHash)){
+  my $cmdOut = $stagedHash{$fileName};
+  foreach (split("\n",$cmdOut)) {
+    #TODO: only look for '^+{1}' (e.g. exclude '^+++')
+    if( length($_) >80 ){
+      $longLineHash{$fileName}{$lineNum} = $_;
+    }
+    $lineNum++;
+  }
+}
+
+print("\nsummary\n");
+
+#TODO: doesnt' check if errors actually presetn
+if(scalar(keys(%longLineHash)) > 0 ){
+  print("The following files cannot be committed for reasons of quality:\n");
+  print("Reason: line length exceding 80 chars:\n");
+  foreach my $file (keys(%longLineHash)){
+    print("file [ $file ] :\n");
+    #TODO: possibly array to avoid sorting the hash; '10' comes before '9' and that's not user-friendly
+    foreach my $lineNum (sort(keys(%{$longLineHash{$file}}))){
+      print("$lineNum: $longLineHash{$file}{$lineNum}\n");
+    }
+  }
+}
+
+exit 1;
+__END__
+
+#TODO: figure out whether this is necessary
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
